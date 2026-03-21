@@ -39,8 +39,8 @@
     },
     "context-hub": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@aisuite/chub", "--mcp"],
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@aisuite/chub", "--mcp"],
       "env": {
         "CHUB_TELEMETRY": "0"
       }
