@@ -1,0 +1,30 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "openclaw-cc",
+  "description": "OpenClaw-CC: Autonomous AI assistant plugin for Claude Code with 5 MCP servers, 21 skills, 3-tier persistent memory, knowledge graph, and multi-agent orchestration",
+  "owner": {
+    "name": "Evan Lee (Kit4Some)",
+    "email": ""
+  },
+  "plugins": [
+    {
+      "name": "openclaw-cc",
+      "version": "2.0.0",
+      "description": "Autonomous AI assistant with persistent memory, knowledge graph, 21 workflow skills, safety guardrails, and Discord/Telegram integration",
+      "source": "./",
+      "category": "productivity",
+      "tags": [
+        "autonomous-agent",
+        "memory",
+        "knowledge-graph",
+        "multi-agent",
+        "orchestration",
+        "mcp-server",
+        "discord",
+        "telegram"
+      ],
+      "homepage": "https://github.com/Kit4Some/Oh-my-ClaudeClaw"
+    }
+  ],
+  "version": "1.0.0"
+}

@@ -1,0 +1,24 @@
+{
+  "name": "openclaw-cc",
+  "version": "2.0.0",
+  "description": "Autonomous AI assistant with 3-tier persistent memory, knowledge graph, 21 workflow skills, and multi-agent orchestration via Discord/Telegram",
+  "author": {
+    "name": "Evan Lee (Kit4Some)"
+  },
+  "repository": "https://github.com/Kit4Some/Oh-my-ClaudeClaw",
+  "homepage": "https://github.com/Kit4Some/Oh-my-ClaudeClaw",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "autonomous-agent",
+    "memory",
+    "knowledge-graph",
+    "multi-agent",
+    "orchestration",
+    "mcp-server"
+  ],
+  "skills": "./skills/",
+  "agents": "./.claude/agents/",
+  "mcpServers": "./.mcp.json"
+}
