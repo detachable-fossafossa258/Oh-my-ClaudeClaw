@@ -1,0 +1,23 @@
+[Unit]
+Description=OpenClaw-CC Webhook Bridge
+After=network.target
+
+[Service]
+Type=simple
+User=%i
+WorkingDirectory=/home/%i/openclaw-cc
+ExecStart=/usr/bin/node /home/%i/openclaw-cc/scripts/webhook-bridge.js
+Restart=always
+RestartSec=10
+EnvironmentFile=/home/%i/openclaw-cc/.env
+
+# Resource limits
+MemoryMax=512M
+CPUQuota=50%
+
+# Logging
+StandardOutput=append:/home/%i/openclaw-cc/scheduler-data/logs/webhook.log
+StandardError=append:/home/%i/openclaw-cc/scheduler-data/logs/webhook-error.log
+
+[Install]
+WantedBy=multi-user.target

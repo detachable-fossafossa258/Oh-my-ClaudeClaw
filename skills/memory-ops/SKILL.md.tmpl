@@ -1,0 +1,163 @@
+---
+name: memory-ops
+description: >
+  Unified memory interface with associative search and OMC integration.
+  Triggers on "기억해", "저장해", "메모리", "뭐였지", "지난번에", "기록해", "잊지마",
+  "정리해", "요약해줘", "remember", "save", "store", "what was it", "last time",
+  "record this", "don't forget", "organize", "summarize" and similar.
+  v3: Default to associative search mode (5-signal ranking). Uses memory-specialist
+  agent for complex operations. Auto-indexes trigrams via PostToolUse hook.
+---
+
+# Memory Operations — Persistent Memory Management Skill
+
+{{OCC_PREAMBLE}}
+
+{{OCC_MEMORY_INIT}}
+
+## Core Principles
+
+1. **Store all important information**: Decisions, insights, and plans from conversations go into memory
+2. **Store with structure**: Assign appropriate category, tags, and importance level
+3. **Retrieve when needed**: Run `memory_search` first whenever related context is required
+4. **Periodically organize**: Clean up old/duplicate memories and consolidate summaries
+
+## Category Guide
+
+| Category | Purpose | Subcategory Examples |
+|----------|---------|----------------------|
+| `projects` | Everything project-related | rutile, sapiens, nexus |
+| `people` | Person info, relationships, meeting notes | ken-huang, investors |
+| `knowledge` | Learned knowledge, technical docs | web3-security, ai-agents |
+| `tasks` | To-dos, work in progress | urgent, backlog |
+| `daily-logs` | Daily activity logs | (date auto-generated) |
+| `inbox` | Unsorted temporary storage | (classify later) |
+
+## Auto-Save Triggers
+
+When the following patterns appear in conversation, **automatically suggest** saving to memory:
+
+- **Decision**: "we decided to ~", "going with ~", "direction is ~"
+- **Plan/Strategy**: "planning to ~ going forward", "the plan is ~"
+- **Person info**: New name + role/relationship
+- **Insight**: "realized that", "the key thing is", "most important is"
+- **Data/Metrics**: Revenue, deadlines, prices, or other specific figures
+- **Risk/Issue**: Problems, risks, cautions
+
+## Store Workflows
+
+### 1. Quick Store
+```
+User: "Remember this — Ken Huang is co-chair of CSA and we're meeting in SF on 3/25"
+
+→ memory_store:
+  category: "people"
+  subcategory: null
+  title: "Ken Huang - CSA Co-Chair"
+  content: "Ken Huang is co-chair of the Cloud Security Alliance. Meeting in SF on 3/25."
+  tags: ["ken-huang", "csa", "sf-trip", "meeting"]
+  importance: 7
+```
+
+### 2. Project Context Store
+```
+User: "We decided to migrate Sapiens to PydanticAI"
+
+→ memory_store:
+  category: "projects"
+  subcategory: "sapiens"
+  title: "Framework Migration Decision - PydanticAI"
+  content: "Decision to migrate from LangGraph to PydanticAI. Reason: ..."
+  tags: ["sapiens", "migration", "pydanticai", "decision"]
+  importance: 8
+```
+
+### 3. Knowledge Store
+```
+User: "Save this vulnerability pattern"
+
+→ memory_store:
+  category: "knowledge"
+  subcategory: "web3-security"
+  title: "Reentrancy Attack Pattern - Cross-function"
+  content: [detailed content]
+  tags: ["vulnerability", "reentrancy", "solidity"]
+  importance: 6
+```
+
+## Search Workflows
+
+### Proactive Context Search
+**Proactively search** relevant memories before starting a task:
+
+```
+User: "Tell me the status of RSA Conference prep"
+
+→ 1. memory_search(query: "RSA Conference")
+→ 2. memory_search(tag: "rsa")
+→ 3. memory_search(category: "projects", query: "rutile conference")
+→ 4. Synthesize results and respond
+```
+
+### Time-Based Lookup
+```
+User: "What did I do last week?"
+
+→ memory_search(category: "daily-logs")
+→ Summarize logs from the past 7 days
+```
+
+## Memory Organization Workflows
+
+### Inbox Classification
+```
+memory_list(directory: "inbox")
+→ Determine appropriate category for each item
+→ Move via memory_update (or file move + re-index)
+```
+
+### Duplicate Consolidation
+```
+Discover similar items with memory_search
+→ Merge content
+→ Delete old entries
+```
+
+### Project Summary Refresh
+```
+memory_search(category: "projects", subcategory: "rutile")
+→ Consolidate recent changes
+→ Update _meta.md summary file
+```
+
+## Daily Log Pattern
+
+Record daily logs automatically or on user request:
+
+```
+memory_daily_log:
+  entry: "AhnLab PoC meeting completed, received additional feature requests"
+  type: "meeting"
+```
+
+Entry types: note, decision, todo, done, idea, meeting
+
+## Memory Tree Navigation
+
+When user requests "show me the memory structure":
+```
+memory_list(directory: "", max_depth: 2)
+→ Visualize and display the full tree structure
+```
+
+## Importance Guide
+
+| Score | Criteria | Examples |
+|-------|----------|---------|
+| 9-10 | Business critical, legal obligation | Investment contract terms, incorporation decision |
+| 7-8 | Core decisions, key relationships | Technical architecture decision, key partner info |
+| 5-6 | Useful reference information | Technical notes, meeting summaries |
+| 3-4 | General records | Daily logs, idea memos |
+| 1-2 | Temporary/one-off | Quick notes, information that will soon be obsolete |
+
+{{OCC_COMPLETION_STATUS}}

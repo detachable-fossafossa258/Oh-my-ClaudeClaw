@@ -1,0 +1,18 @@
+{
+  "name": "openclaw-cc-knowledge-engine",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "Knowledge refinement, graph traversal, and similarity engine for OpenClaw-CC",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "better-sqlite3": "^11.0.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0"
+  }
+}

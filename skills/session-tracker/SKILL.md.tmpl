@@ -1,0 +1,136 @@
+---
+name: session-tracker
+description: >
+  Session context tracking with OMC state bridge. Triggers automatically at session
+  start or on "마지막 세션", "이전 작업", "어디까지 했지", "last session", "continue
+  where I left off", "resume work" and similar. v3: Dual-writes to both OMC
+  state (notepad/project-memory) and OpenClaw-CC persistent memory. Uses
+  session-manager agent for cross-system continuity. Hooks auto-save on
+  PreCompact and Stop events.
+---
+
+# Session Tracker — Cross-Session Continuity Skill
+
+{{OCC_PREAMBLE}}
+
+## Role
+
+Maintain session continuity across Claude Code conversations. Load previous
+session context at start, track current session progress, and save session
+summary at end.
+
+## Session Start Workflow
+
+### Step 1 — Load Previous Context
+
+{{OCC_MEMORY_INIT}}
+
+```
+memory_search(category: "sessions", limit: 1) → Most recent session
+memory_get(id: last_session_id) → Full session details
+```
+
+### Step 2 — Display Context
+
+```markdown
+## Previous Session Summary
+**Date**: {date}
+**Duration**: {approximate}
+**Key Work**: {summary}
+
+### Unfinished Items
+- [ ] {todo_1}
+- [ ] {todo_2}
+
+### Key Decisions Made
+- {decision_1}
+- {decision_2}
+
+Ready to continue or start new work?
+```
+
+### Step 3 — Initialize Current Session
+
+```
+memory_store:
+  category: "sessions"
+  title: "Session {YYYY-MM-DD HH:MM}"
+  content: "Session started. Previous context loaded from session #{prev_id}."
+  tags: ["session", "{date}"]
+  importance: 3
+```
+
+## During Session
+
+### Auto-Track Events
+
+Track these automatically during the session:
+
+| Event | Action |
+|-------|--------|
+| Important decision | `memory_update(mode: "append", content: "Decision: ...")` |
+| Task completion | `memory_update(mode: "append", content: "Completed: ...")` |
+| Blocker encountered | `memory_update(mode: "append", content: "Blocked: ...")` |
+| File created/modified | `memory_update(mode: "append", content: "Modified: ...")` |
+
+### Periodic Checkpoint
+
+Every 10-15 significant interactions, save a checkpoint:
+
+```
+memory_update(id: current_session_id, mode: "append",
+  content: "Checkpoint: {summary of recent work}")
+```
+
+## Session End Workflow
+
+### Step 1 — Generate Summary
+
+Compile all tracked events into a session summary.
+
+### Step 2 — Save & Log
+
+{{OCC_MEMORY_PERSIST}}
+
+```
+memory_update(id: current_session_id, mode: "replace",
+  content: "{complete session summary with todos}")
+memory_daily_log(entry: "Session completed: {one-line summary}", type: "done")
+```
+
+### Step 3 — Identify Carryover
+
+List unfinished items for the next session:
+
+```markdown
+## Session Complete
+
+### Accomplished
+- {item_1}
+- {item_2}
+
+### Carry Forward
+- [ ] {unfinished_1}
+- [ ] {unfinished_2}
+
+Session saved as memory #{id}.
+```
+
+## Session Memory Structure
+
+```
+sessions/
+├── Session 2026-03-20 09:00.md
+├── Session 2026-03-20 14:30.md
+└── Session 2026-03-21 10:00.md
+```
+
+Each session file contains:
+- Start time and previous session reference
+- Chronological event log
+- Decisions and rationale
+- Files modified
+- Unfinished items
+- End summary
+
+{{OCC_COMPLETION_STATUS}}

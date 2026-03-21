@@ -1,0 +1,263 @@
+---
+name: ship
+description: >
+  Automated release workflow with comprehensive quality gates. Triggers on "배포",
+  "릴리스", "ship it", "PR 만들어", "release", "deploy", "create PR", "push this",
+  "ship". Non-interactive: user says /ship, next thing they see is the PR URL.
+  Delegates commit organization to OMC git-master, review to code-reviewer,
+  verification to verifier. Sends PR notification via messenger.
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+  - Edit
+  - Grep
+  - Glob
+  - Agent
+  - AskUserQuestion
+---
+
+# Ship — Fully Automated Release Workflow
+
+You are running the `/ship` workflow. This is **non-interactive, fully automated**.
+Do NOT ask for confirmation at any step. The user said `/ship` which means DO IT.
+Run straight through and output the PR URL at the end.
+
+**Only stop for:**
+- On the base branch (abort)
+- Merge conflicts that can't be auto-resolved
+- Test failures
+- Pre-landing review finds ASK items needing user judgment
+- MINOR or MAJOR version bump needed
+
+**Never stop for:**
+- Uncommitted changes (always include them)
+- PATCH/MICRO version bump (auto-pick)
+- CHANGELOG content (auto-generate from diff)
+- Commit message approval (auto-commit)
+
+{{OCC_PREAMBLE}}
+
+{{OCC_MEMORY_INIT}}
+
+---
+
+## Step 0 — Base Branch Detection
+
+{{OCC_BASE_BRANCH_DETECT}}
+
+---
+
+## Step 1 — Pre-flight Checks
+
+1. Check current branch. If on base branch, **abort**: "You're on the base branch. Run /ship from a feature branch."
+2. Run `git status` (never use `-uall`). Uncommitted changes are always included.
+3. Run `git diff $BASE...HEAD --stat` and `git log $BASE..HEAD --oneline` to understand what's being shipped.
+
+---
+
+## Step 2 — Merge Base Branch (BEFORE tests)
+
+Fetch and merge the base branch so tests run against the merged state:
+
+```bash
+git fetch origin $BASE && git merge origin/$BASE --no-edit
+```
+
+If merge conflicts: try auto-resolve simple ones. If complex, **STOP** and show them.
+If already up to date: continue silently.
+
+---
+
+## Step 2.5 — Test Framework Bootstrap
+
+{{OCC_TEST_BOOTSTRAP}}
+
+---
+
+## Step 3 — Run Tests (on merged code)
+
+Run detected test command:
+```bash
+$TEST_CMD 2>&1 | tee /tmp/ship_tests.txt
+```
+
+**If any test fails:** Show failures and **STOP**. Do not proceed.
+**If all pass:** Continue — note counts briefly.
+
+**Post-test LSP diagnostics:**
+
+If OMC LSP tools are available, run diagnostics on changed files:
+```
+lsp_diagnostics_directory("<changed-directory>")
+```
+Flag any type errors, unused imports, or lint issues that tests might not catch.
+
+---
+
+## Step 3.4 — Test Coverage Audit
+
+Delegate to OMC test-engineer for coverage analysis:
+
+```
+Agent(subagent_type: "oh-my-claudecode:test-engineer", prompt: "
+  Analyze test coverage for the diff: git diff origin/$BASE...HEAD
+  1. Trace every changed codepath
+  2. Map each branch against existing tests
+  3. Output ASCII coverage diagram with [TESTED] and [GAP] markers
+  4. Generate tests for uncovered paths (max 20 tests)
+  5. Run generated tests, commit passing ones
+")
+```
+
+**Fast path:** All paths covered → "Step 3.4: All new code paths have test coverage ✓"
+
+---
+
+## Step 3.5 — Pre-Landing Review
+
+Delegate to OMC code-reviewer for structural review:
+
+```
+Agent(subagent_type: "oh-my-claudecode:code-reviewer", prompt: "
+  Review diff: git diff origin/$BASE
+  Two-pass review:
+  Pass 1 (CRITICAL): SQL safety, race conditions, secrets exposure, auth gaps
+  Pass 2 (INFORMATIONAL): Dead code, magic numbers, style, N+1 queries
+
+  Classify each finding as AUTO-FIX or ASK.
+  AUTO-FIX: apply directly, report one line per fix.
+  ASK: collect for user decision.
+")
+```
+
+If AUTO-FIX items applied → commit: `fix: pre-landing review auto-fixes`
+If ASK items remain → present via AskUserQuestion, one batch.
+
+---
+
+## Step 4 — Version Bump (auto-decide)
+
+If VERSION file exists:
+1. Count lines changed: `git diff origin/$BASE...HEAD --stat | tail -1`
+2. Auto-decide: <50 lines → MICRO/PATCH, 50+ → PATCH, major feature → ask MINOR
+3. Write new version, reset lower digits to 0
+
+If no VERSION file: skip this step.
+
+---
+
+## Step 5 — CHANGELOG (auto-generate)
+
+If CHANGELOG.md exists:
+1. Read header for format
+2. Generate from ALL commits: `git log $BASE..HEAD --oneline`
+3. Categorize: Added / Changed / Fixed / Removed
+4. Insert after header, dated today
+5. Do NOT ask the user — infer from diff
+
+---
+
+## Step 5.5 — TODOS.md Auto-Update
+
+If TODOS.md exists:
+1. Cross-reference diff against open TODOs
+2. Mark completed items (conservative — only clear evidence)
+3. Move to Completed section with version and date
+
+---
+
+## Step 6 — Bisectable Commits
+
+Organize changes into logical, independently valid commits:
+
+| Order | Category |
+|-------|----------|
+| 1 | Infrastructure (deps, config, CI) |
+| 2 | Data/Schema (migrations, types) |
+| 3 | Core logic (services, controllers) |
+| 4 | Tests |
+| 5 | VERSION + CHANGELOG + TODOS.md |
+
+Each commit: conventional message, independently valid, no broken imports.
+Final commit gets co-author trailer:
+```
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+```
+
+---
+
+## Step 6.5 — Verification Gate (Iron Law)
+
+**NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE.**
+
+Before pushing, if ANY code changed after Step 3's test run:
+1. Re-run test suite. Paste fresh output.
+2. Run build if applicable.
+
+Rationalization prevention:
+- "Should work now" → RUN IT.
+- "Confident" → Confidence is not evidence.
+- "Already tested" → Code changed. Test again.
+
+If tests fail: **STOP**. Fix and return to Step 3.
+
+---
+
+## Step 7 — Push
+
+```bash
+git push -u origin $(git rev-parse --abbrev-ref HEAD)
+```
+
+---
+
+## Step 8 — Create PR
+
+```bash
+gh pr create --base $BASE --title "<type>: <summary>" --body "$(cat <<'EOF'
+## Summary
+<bullet points from CHANGELOG>
+
+## Test Coverage
+<coverage diagram from Step 3.4>
+
+## Pre-Landing Review
+<findings from Step 3.5>
+
+## Test Plan
+- [x] All tests pass
+- [x] Pre-landing review complete
+- [x] Verification gate passed
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+
+Output the PR URL.
+
+---
+
+## Step 9 — Record & Notify
+
+{{OCC_MEMORY_PERSIST}}
+
+{{OCC_MESSENGER_NOTIFY}}
+
+```
+memory_daily_log(entry: "Shipped: {PR title} #{PR number}", type: "done")
+messenger_send(platform: "all", message: "✅ [ship] PR created: {PR URL}\n{summary}")
+```
+
+---
+
+## Safety Rules
+
+1. Never push to main/master directly
+2. Never force push without explicit user request
+3. Always run tests before creating PR
+4. Never skip hooks (--no-verify)
+5. Verify branch is not main before any push
+
+{{OCC_COMPLETION_STATUS}}

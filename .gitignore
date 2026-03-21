@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+
+# Memory Database (user-specific data)
+*.db
+*.db-wal
+*.db-shm
+memory-store/_memory.db*
+memory-store/daily-logs/
+memory-store/inbox/
+memory-store/projects/
+memory-store/people/
+memory-store/knowledge/
+memory-store/tasks/
+
+# Scheduler Data (user-specific)
+scheduler-data/tasks.json
+scheduler-data/history.json
+scheduler-data/logs/
+scheduler-data/daemon.pid
+
+# OMC State (ephemeral)
+.omc/
+
+# Claude Code Session Data
+.claude/plans/
+.claude/todos/
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temp docs (archived originals)
+temp-docs/
+
+# Build & Temp
+dist/
+tmp/
+*.log

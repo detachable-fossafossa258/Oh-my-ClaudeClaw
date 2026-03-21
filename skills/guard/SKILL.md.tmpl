@@ -1,0 +1,68 @@
+---
+name: guard
+description: >
+  Maximum safety mode — activates both /careful (destructive command warnings)
+  and /freeze (edit scope restriction) together. Triggers on "guard", "가드",
+  "최대 안전", "max safety", "maximum safety", "안전 모드 풀".
+allowed-tools:
+  - Bash
+  - Read
+  - AskUserQuestion
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "bash ${CLAUDE_SKILL_DIR}/../careful/bin/check-careful.sh"
+          statusMessage: "Checking for destructive commands..."
+    - matcher: "Edit"
+      hooks:
+        - type: command
+          command: "bash ${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh"
+          statusMessage: "Checking freeze boundary..."
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "bash ${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh"
+          statusMessage: "Checking freeze boundary..."
+---
+
+# /guard — Maximum Safety Mode
+
+Activates **both** safety layers:
+- **Destructive command warnings** (`/careful`) — warns before rm -rf, DROP TABLE, force-push, etc.
+- **Edit scope restriction** (`/freeze`) — blocks edits outside a chosen directory
+
+{{OCC_PREAMBLE}}
+
+## Setup
+
+This skill combines `/careful` + `/freeze`. The destructive command warnings are
+active immediately. For edit restrictions, specify a directory:
+
+Ask via AskUserQuestion:
+"Guard mode activated. Destructive command warnings are on. Would you also like to restrict edits to a specific directory? Enter a path, or type 'skip' to allow all."
+
+If the user provides a path (not 'skip'):
+```bash
+FREEZE_DIR=$(cd "<user-provided-path>" 2>/dev/null && pwd)
+FREEZE_DIR="${FREEZE_DIR%/}/"
+STATE_DIR="${CLAUDE_PLUGIN_DATA:-${HOME}/.omc/state}"
+mkdir -p "$STATE_DIR"
+echo "$FREEZE_DIR" > "$STATE_DIR/freeze-dir.txt"
+```
+
+If the user says 'skip': only /careful is active, /freeze is not set.
+
+Log:
+```
+memory_daily_log(type: "note", entry: "Guard mode activated: careful + freeze({path or 'none'})")
+```
+
+## Deactivation
+
+- Run `/unfreeze` to remove edit restrictions only (keeps destructive warnings)
+- End the conversation to remove both protections
+- Hooks are session-scoped
+
+{{OCC_COMPLETION_STATUS}}

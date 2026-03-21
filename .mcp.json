@@ -1,0 +1,49 @@
+{
+  "mcpServers": {
+    "memory-manager": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./mcp-servers/memory-manager/src/index.js"],
+      "env": {
+        "MEMORY_ROOT": "./memory-store"
+      }
+    },
+    "messenger-bot": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./mcp-servers/messenger-bot/src/index.js"],
+      "env": {
+        "DISCORD_BOT_TOKEN": "${DISCORD_BOT_TOKEN}",
+        "DISCORD_CHANNEL_ID": "${DISCORD_CHANNEL_ID}",
+        "DISCORD_WEBHOOK_URL": "${DISCORD_WEBHOOK_URL}",
+        "TELEGRAM_BOT_TOKEN": "${TELEGRAM_BOT_TOKEN}",
+        "TELEGRAM_CHAT_ID": "${TELEGRAM_CHAT_ID}"
+      }
+    },
+    "knowledge-engine": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./mcp-servers/knowledge-engine/src/index.js"],
+      "env": {
+        "MEMORY_ROOT": "./memory-store"
+      }
+    },
+    "task-scheduler": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./mcp-servers/task-scheduler/src/index.js"],
+      "env": {
+        "SCHEDULER_DATA": "./scheduler-data",
+        "OPENCLAW_PROJECT_DIR": "."
+      }
+    },
+    "context-hub": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@aisuite/chub", "--mcp"],
+      "env": {
+        "CHUB_TELEMETRY": "0"
+      }
+    }
+  }
+}

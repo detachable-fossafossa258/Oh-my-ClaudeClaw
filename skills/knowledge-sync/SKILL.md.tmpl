@@ -1,0 +1,140 @@
+---
+name: knowledge-sync
+description: >
+  Bidirectional synchronization between OMC's project-memory and OpenClaw-CC's
+  persistent memory store. Triggers on "지식 동기화", "sync memory", "knowledge sync",
+  "메모리 동기화", "OMC 동기화", "synchronize", "sync state" and similar requests.
+  Ensures knowledge is shared across both systems — OMC's ephemeral state becomes
+  persistent, and OpenClaw-CC's long-term knowledge becomes available to OMC agents.
+---
+
+# Knowledge Sync — OMC ↔ OpenClaw-CC Memory Synchronization
+
+{{OCC_PREAMBLE}}
+
+## Role
+
+Synchronize knowledge between oh-my-claudecode's project-memory (ephemeral, `.omc/`)
+and OpenClaw-CC's persistent memory store (SQLite + Markdown files). This ensures
+that insights captured by OMC agents survive sessions, and long-term knowledge from
+OpenClaw-CC is available to OMC's planning and execution.
+
+## Sync Directions
+
+```
+OMC project-memory  ──→  OpenClaw-CC memory_store    (Persist)
+OpenClaw-CC memory  ──→  OMC notepad_write_priority  (Inject)
+```
+
+## Workflow
+
+### Step 1 — Read OMC State
+
+```
+project_memory_read → Full OMC project memory
+notepad_read → Current OMC notepad (priority + working)
+state_list_active → Active OMC states
+```
+
+### Step 2 — Read OpenClaw-CC State
+
+{{OCC_MEMORY_INIT}}
+
+```
+memory_search(limit: 20) → Recent memories
+memory_stats → Overall health
+memory_search(category: "projects") → Project-specific knowledge
+```
+
+### Step 3 — Diff Analysis
+
+Compare both datasets to find:
+
+| Gap Type | Detection | Action |
+|----------|-----------|--------|
+| OMC-only entries | In project-memory but not in memory_search | Persist to OpenClaw-CC |
+| CC-only entries | In memory_search but not in project-memory | Inject to OMC notepad |
+| Stale OMC state | OMC state older than CC memory | Update OMC from CC |
+| Conflicts | Same topic, different content | Flag for manual review |
+
+### Step 4 — OMC → OpenClaw-CC (Persist)
+
+For each OMC-only entry:
+```
+memory_similar(text: "{omc_entry}") → Check for near-duplicates
+If no duplicate (similarity < 0.5):
+  memory_store(
+    category: "projects",
+    title: "{omc_entry_title}",
+    content: "{omc_entry_content}",
+    tags: ["synced-from-omc", "{project}"],
+    importance: 5,
+    source: "system"
+  )
+If duplicate found:
+  memory_update(id: existing_id, mode: "append",
+    content: "\n\n---\n**OMC Sync**: {new_info}")
+```
+
+### Step 5 — OpenClaw-CC → OMC (Inject)
+
+For critical CC knowledge not in OMC:
+```
+notepad_write_priority(content: "
+  ## Synced from Memory Store
+  {key_findings_summary}
+  Memory IDs: {id_list}
+  Use memory_get(id) for full details.
+")
+
+project_memory_add_note(note: "{critical_knowledge_summary}")
+```
+
+### Step 6 — Report
+
+{{OCC_MEMORY_PERSIST}}
+
+```markdown
+## Knowledge Sync Report
+
+**Direction**: Bidirectional
+**Timestamp**: {datetime}
+
+### OMC → OpenClaw-CC (Persisted)
+- {N} new entries stored
+- {M} existing entries updated
+- Categories: {list}
+
+### OpenClaw-CC → OMC (Injected)
+- {K} entries injected to notepad
+- {J} entries added to project-memory
+
+### Conflicts (Manual Review)
+- {conflict_list or "None"}
+
+### Memory Health
+- Total memories: {count}
+- Sync coverage: {percentage}%
+```
+
+## Automation
+
+Register as periodic task:
+```
+task_create(
+  name: "knowledge-sync",
+  cron: "0 */6 * * *",
+  prompt: "Run knowledge-sync: synchronize OMC and OpenClaw-CC memory",
+  tags: ["sync", "maintenance"]
+)
+```
+
+## Principles
+
+1. **Dedup before store** — Always check `memory_similar` before creating
+2. **Tag synced entries** — Use `synced-from-omc` tag for traceability
+3. **Don't overwrite** — Append, don't replace, when updating existing entries
+4. **Lightweight injection** — Only inject summaries to OMC (use memory IDs for details)
+5. **Conflict resolution** — Flag conflicts, don't auto-resolve
+
+{{OCC_COMPLETION_STATUS}}

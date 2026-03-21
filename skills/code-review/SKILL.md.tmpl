@@ -1,0 +1,186 @@
+---
+name: code-review
+description: >
+  Multi-pass code review with scope drift detection and Fix-First heuristic.
+  Triggers on "코드 리뷰", "리뷰해줘", "PR 확인", "code review", "review this",
+  "check my code", "review PR", "코드 검토". Pass 1 auto-fixes mechanical issues;
+  Pass 2 security audit; Pass 3 flags judgment-required items. WTF-likelihood safety gate.
+allowed-tools:
+  - Bash
+  - Read
+  - Edit
+  - Write
+  - Grep
+  - Glob
+  - Agent
+  - AskUserQuestion
+---
+
+# Code Review — Multi-Pass Review with Scope Drift Detection
+
+{{OCC_PREAMBLE}}
+
+{{OCC_MEMORY_INIT}}
+
+---
+
+## Step 1 — Branch & Diff Setup
+
+```bash
+git branch --show-current
+```
+
+If on base branch: "Nothing to review — you're on the base branch." Stop.
+
+{{OCC_BASE_BRANCH_DETECT}}
+
+```bash
+git fetch origin $BASE --quiet
+git diff origin/$BASE --stat
+```
+
+If no diff: stop.
+
+---
+
+## Step 1.5 — Scope Drift Detection
+
+Before reviewing code quality, check: **did they build what was requested?**
+
+1. Read `TODOS.md` (if exists). Read PR description (`gh pr view --json body -q .body 2>/dev/null`).
+   Read commit messages (`git log origin/$BASE..HEAD --oneline`).
+2. Identify the **stated intent** — what was this branch supposed to accomplish?
+3. Compare files changed against stated intent.
+4. Evaluate:
+
+   **SCOPE CREEP**: Files changed unrelated to intent. "While I was in there..." changes.
+   **MISSING REQUIREMENTS**: Requirements not addressed in the diff. Partial implementations.
+
+5. Output:
+   ```
+   Scope Check: [CLEAN / DRIFT DETECTED / REQUIREMENTS MISSING]
+   Intent: <1-line summary>
+   Delivered: <1-line summary of what diff actually does>
+   ```
+
+This is **INFORMATIONAL** — does not block the review.
+
+---
+
+## Step 2 — Pass 1: Mechanical Review via OMC `code-reviewer` (opus)
+
+**Pre-review diagnostics via OMC tools:**
+```bash
+# Run LSP diagnostics on all changed directories
+lsp_diagnostics_directory("<changed-directory>")
+
+# Search for known anti-patterns via AST
+ast_grep_search(pattern: "$FUNC($$$ARGS)", lang: "typescript")
+```
+
+Use LSP/AST findings to inform the code-reviewer agent delegation.
+
+```
+Agent(subagent_type: "oh-my-claudecode:code-reviewer", prompt: "
+  Review diff: git diff origin/$BASE
+  Check: SQL injection, XSS, CSRF, secrets, race conditions, magic numbers,
+  dead code, stale comments, N+1 queries, style violations.
+
+  Classify each finding:
+  - AUTO-FIX: Safe to fix automatically (dead code, style, stale comments)
+  - ASK: Requires judgment (architecture, security tradeoffs, API design)
+
+  Auto-fix all AUTO-FIX items. Report: [AUTO-FIXED] [file:line] Problem → Fix
+")
+```
+
+---
+
+## Step 2.5 — Pass 2: Security Review via OMC `security-reviewer` (parallel)
+
+Run **in parallel** with Pass 1:
+
+```
+Agent(subagent_type: "oh-my-claudecode:security-reviewer", prompt: "
+  Security audit: git diff origin/$BASE
+  Check OWASP Top 10, secrets exposure, unsafe deserialization,
+  dependency vulnerabilities, auth/authz gaps.
+  Report severity-rated findings. Do NOT auto-fix.
+")
+```
+
+---
+
+## Step 3 — Pass 3: Deep Analysis (Judgment Required)
+
+Merge results from both agents. For each ASK item, present via AskUserQuestion:
+
+```
+Auto-fixed {N} issues. {K} need your input:
+
+1. [CRITICAL] file:line — Problem description
+   Fix: Recommendation
+   → A) Fix  B) Skip
+
+2. [INFORMATIONAL] file:line — Problem description
+   Fix: Recommendation
+   → A) Fix  B) Skip
+
+RECOMMENDATION: {overall recommendation}
+```
+
+---
+
+## Step 3.5 — Documentation Staleness Check
+
+Cross-reference diff against .md files in repo root:
+- If code changed but related docs NOT updated → INFORMATIONAL finding
+- "Documentation may be stale: [file] describes [feature] but code changed."
+
+---
+
+## Step 4 — Verification of Claims
+
+Before producing final output:
+- If you claim "this pattern is safe" → cite the specific line
+- If you claim "handled elsewhere" → read and cite the handling code
+- If you claim "tests cover this" → name the test file and method
+- **Never say "likely handled" or "probably tested"** — verify or flag as unknown
+
+---
+
+## WTF-Likelihood Safety Gate
+
+| Action | Risk Delta |
+|--------|-----------|
+| Revert a file | +15% |
+| Modify 3+ files | +5% per file beyond 3 |
+| Change public API | +10% |
+| Modify test fixtures | +5% |
+| Touch configuration | +8% |
+
+- **> 20%**: Pause, ask user
+- **> 40%**: Full risk breakdown, recommend incremental approach
+- **Hard cap**: 50 changes max
+
+---
+
+## Review Report
+
+```
+═══════════════════════════════════════
+Code Review Report
+═══════════════════════════════════════
+Scope Check: {CLEAN/DRIFT/MISSING}
+Pass 1 — Auto-Fixed: {N} issues across {M} files
+Pass 2 — Security: {K} findings ({severity breakdown})
+Pass 3 — Flagged: {J} items requiring decision
+Doc Staleness: {any stale docs}
+WTF-Likelihood: {percentage}%
+Overall Health: {Good / Needs Attention / Significant Issues}
+═══════════════════════════════════════
+```
+
+{{OCC_MEMORY_PERSIST}}
+
+{{OCC_COMPLETION_STATUS}}

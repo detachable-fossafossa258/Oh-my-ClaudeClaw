@@ -1,0 +1,12 @@
+{
+  "name": "openclaw-cc",
+  "version": "2.0.0",
+  "description": "OpenClaw-CC: Claude Code Native AI Assistant with MCP + Skills",
+  "type": "module",
+  "scripts": {
+    "gen:skill-docs": "node scripts/gen-skill-docs.mjs",
+    "gen:skill-docs:dry": "node scripts/gen-skill-docs.mjs --dry-run",
+    "skill:check": "node scripts/skill-check.mjs"
+  },
+  "private": true
+}

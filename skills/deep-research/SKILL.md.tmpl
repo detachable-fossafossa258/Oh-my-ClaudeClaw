@@ -1,0 +1,197 @@
+---
+name: deep-research
+description: >
+  Multi-agent deep research with parallel execution and knowledge graph
+  integration. Triggers on "심층 조사", "deep research", "thorough investigation",
+  "comprehensive analysis", "깊이 파봐", "detailed study", "in-depth research"
+  and similar requests. Spawns multiple research agents in parallel, synthesizes
+  via analyst, deduplicates against existing knowledge, builds graph connections,
+  and delivers a comprehensive report.
+---
+
+# Deep Research — Multi-Agent Parallel Research with Knowledge Graph
+
+{{OCC_PREAMBLE}}
+
+## Role
+
+Perform comprehensive research using multiple OMC agents in parallel.
+Unlike basic web research, deep research cross-references multiple sources,
+deduplicates against existing knowledge, builds knowledge graph connections,
+and produces analyst-grade reports.
+
+## Workflow
+
+### Phase 1 — Existing Knowledge Assessment
+
+{{OCC_MEMORY_INIT}}
+
+```
+memory_search(associative: true, context: {
+  tags: ["{topic}", "research"],
+  date: "{today}"
+})
+memory_graph(id: related_memory_id, depth: 2) → Map existing knowledge
+```
+
+Produce a **knowledge gap analysis**: what is known vs what needs research.
+
+### Phase 2 — Parallel Agent Dispatch
+
+Spawn 3 research agents with different angles:
+
+```
+Agent(name: "researcher-1", subagent_type: "research-agent",
+  prompt: "Research '{topic}': focus on OVERVIEW and landscape.
+    Search in both Korean and English.
+    Return structured findings with source URLs.",
+  run_in_background: true)
+
+Agent(name: "researcher-2", subagent_type: "research-agent",
+  prompt: "Research '{topic}': focus on RECENT DEVELOPMENTS (last 6 months).
+    Find news, announcements, and technical updates.
+    Return structured findings with dates and sources.",
+  run_in_background: true)
+
+Agent(name: "researcher-3", subagent_type: "research-agent",
+  prompt: "Research '{topic}': focus on TECHNICAL DEPTH and implementation.
+    Find documentation, code examples, architecture details.
+    Return structured findings with code snippets if available.",
+  run_in_background: true)
+```
+
+### Phase 3 — Synthesis via OMC Analyst
+
+```
+Agent(subagent_type: "oh-my-claudecode:analyst", model: "opus",
+  prompt: "
+    Synthesize these 3 research reports into a unified analysis:
+
+    Report 1 (Overview): {researcher_1_output}
+    Report 2 (Recent): {researcher_2_output}
+    Report 3 (Technical): {researcher_3_output}
+
+    Produce:
+    1. Key findings (ranked by importance)
+    2. Trend analysis
+    3. Technical assessment
+    4. Gaps and uncertainties
+    5. Recommendations
+  ")
+```
+
+### Phase 4 — Deduplication & Knowledge Graph
+
+```
+# Check each finding against existing knowledge
+For each key finding:
+  memory_similar(text: "{finding}") → Check duplicates
+
+  If similarity > 0.7:
+    memory_update(id: existing, mode: "append", content: "Updated: {new_info}")
+  Else:
+    new_id = memory_store(
+      category: "knowledge",
+      subcategory: "{domain}",
+      title: "Research: {finding_title}",
+      tags: ["research", "deep-research", "{topic}"],
+      importance: 6
+    )
+
+# Build knowledge graph connections
+memory_link(source: new_id, target: existing_id, relation: "related")
+memory_link(source: new_id, target: overview_id, relation: "derived")
+```
+
+### Phase 5 — Quality Review via OMC Critic
+
+```
+Agent(subagent_type: "oh-my-claudecode:critic", model: "opus",
+  prompt: "
+    Review this research report for completeness and accuracy:
+    {synthesized_report}
+
+    Check for:
+    1. Unsupported claims (no source)
+    2. Logical gaps
+    3. Missing perspectives
+    4. Outdated information
+    5. Contradictions between sources
+
+    Provide a quality score (1-10) and specific improvement suggestions.
+  ")
+```
+
+### Phase 6 — Final Report & Delivery
+
+```markdown
+## Deep Research Report: {Topic}
+
+**Quality Score**: {critic_score}/10
+**Sources Consulted**: {N} across {M} domains
+**Knowledge Graph**: {K} new nodes, {J} new connections
+
+### Executive Summary
+{one_paragraph_overview}
+
+### Key Findings
+1. {Finding} — Source: {url} — Confidence: High/Medium/Low
+2. {Finding} — Source: {url} — Confidence: High/Medium/Low
+3. ...
+
+### Trend Analysis
+{trends_and_direction}
+
+### Technical Assessment
+{technical_details_with_code_examples}
+
+### Data Points
+| Metric | Value | Source | Date |
+|--------|-------|--------|------|
+
+### Source Credibility Matrix
+| Source | Type | Credibility | Recency |
+|--------|------|-------------|---------|
+
+### Gaps & Uncertainties
+- {unverified_claims}
+- {missing_perspectives}
+
+### Recommendations
+1. {actionable_recommendation}
+2. {actionable_recommendation}
+
+### Knowledge Graph Impact
+- New memories created: {list_with_ids}
+- Connected to existing: {list_of_links}
+- Stored as: memory #{primary_id}
+```
+
+### Delivery
+
+{{OCC_MEMORY_PERSIST}}
+
+```
+memory_store(category: "knowledge", title: "Deep Research: {topic}",
+  importance: 7, tags: ["deep-research", "{topic}"])
+memory_daily_log(type: "done", entry: "Deep research completed: {topic}")
+```
+
+{{OCC_MESSENGER_NOTIFY}}
+
+```
+messenger_send(platform: "telegram",
+  message: "📊 Deep research complete: {topic}\nScore: {score}/10\nFindings: {count}\nMemory: #{id}")
+```
+
+## Principles
+
+1. **Parallel-first** — Always run 3 researchers in parallel for speed
+2. **Multi-angle** — Overview + Recent + Technical = comprehensive coverage
+3. **Dedup-before-store** — Every finding checked against existing knowledge
+4. **Graph-connected** — All new knowledge linked to existing via `memory_link`
+5. **Quality-gated** — Critic review before final delivery
+6. **Bilingual** — Korean and English sources for Korean-context topics
+7. **Attribution** — Every claim traced to its source URL
+
+{{OCC_COMPLETION_STATUS}}

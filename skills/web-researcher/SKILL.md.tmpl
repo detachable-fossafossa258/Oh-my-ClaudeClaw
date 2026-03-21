@@ -1,0 +1,148 @@
+---
+name: web-researcher
+description: >
+  Web research with OMC team parallel execution. Triggers on "웹에서 찾아",
+  "최신 정보", "리서치해", "동향", "web research", "find online", "latest info",
+  "look up", "search the web", "trend analysis" and similar. v3: Spawns
+  research-agent in parallel for multi-angle search. Deduplicates via
+  memory_similar. Builds knowledge graph connections. For comprehensive
+  research use /deep-research instead.
+---
+
+# Web Researcher — Automated Web Research & Knowledge Integration
+
+{{OCC_PREAMBLE}}
+
+## Role
+
+Perform systematic web research using multiple queries and angles. Collect,
+verify, structure, and persist findings in memory. Link new knowledge to
+existing related memories for a connected knowledge graph.
+
+## Workflow
+
+### Step 1 — Check Existing Knowledge
+
+{{OCC_MEMORY_INIT}}
+
+```
+memory_search(query: "{research topic}")
+memory_search(tag: "{topic tag}")
+```
+
+Identify what is already known to avoid redundant research.
+
+### Step 2 — Multi-Query Search Strategy
+
+Generate at least 3 search queries from different angles:
+
+```
+web_search("{topic} overview 2026")              → General landscape
+web_search("{topic} latest developments")          → Recent news
+web_search("{topic} {specific_aspect}")            → Targeted depth
+```
+
+For bilingual topics (Korean context):
+```
+web_search("{Korean query}")                       → Korean sources
+web_search("{English query}")                      → English sources
+```
+
+### Step 3 — Content Collection
+
+Fetch top 3-5 URLs from search results:
+
+```
+web_fetch(url_1) → Extract key information
+web_fetch(url_2) → Extract key information
+web_fetch(url_3) → Extract key information
+```
+
+For each source, extract:
+- Key facts and data points
+- Dates and recency
+- Source credibility assessment
+- Relevant quotes or statistics
+
+### Step 4 — Synthesis & Structuring
+
+Organize findings into a structured report:
+
+```markdown
+## Research: {Topic}
+
+### Key Findings
+1. {Finding with source attribution}
+2. {Finding with source attribution}
+3. {Finding with source attribution}
+
+### Data Points
+| Metric | Value | Source | Date |
+|--------|-------|--------|------|
+| {metric} | {value} | {source} | {date} |
+
+### Source Assessment
+| Source | Credibility | Recency | Notes |
+|--------|------------|---------|-------|
+| {url} | High/Medium/Low | {date} | {notes} |
+
+### Analysis
+{Synthesized analysis combining multiple sources}
+
+### Gaps & Uncertainties
+- {What couldn't be confirmed}
+- {Conflicting information found}
+```
+
+### Step 5 — Memory Persistence
+
+{{OCC_MEMORY_PERSIST}}
+
+```
+memory_store:
+  category: "knowledge"
+  subcategory: "{topic-area}"
+  title: "Research: {Topic} ({date})"
+  content: {structured report}
+  tags: ["research", "{topic}", "{subtopic}"]
+  importance: 6
+  summary: "{one-line key finding}"
+```
+
+### Step 6 — Knowledge Graph Integration
+
+Link new findings to existing related memories:
+
+```
+memory_search(query: "{related topic}") → Find related memories
+memory_link(source_id: new_id, target_id: related_id, relation: "related")
+```
+
+### Step 7 — Report Delivery
+
+```markdown
+## Research Complete: {Topic}
+
+**Sources consulted**: {N} web pages across {M} domains
+**Key finding**: {one-line summary}
+**Stored as**: memory #{id}
+**Linked to**: {N} related existing memories
+
+{Full structured report}
+```
+
+{{OCC_MESSENGER_NOTIFY}}
+
+```
+messenger_send(platform: "telegram",
+  message: "Research complete: {topic}. Key finding: {summary}")
+```
+
+## Research Principles
+
+1. **Multiple sources** — Never rely on a single source. Cross-reference
+2. **Recency matters** — Prefer sources from the last 6 months
+3. **Source attribution** — Always cite where information came from
+4. **Acknowledge uncertainty** — Flag conflicting or unverifiable claims
+5. **Build on existing** — Check memory first, add incrementally
+6. **Bilingual coverage** — For Korean-context topics, search both Korean and English

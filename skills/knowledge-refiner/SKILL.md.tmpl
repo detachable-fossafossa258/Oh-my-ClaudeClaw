@@ -1,0 +1,113 @@
+---
+name: knowledge-refiner
+description: >
+  Memory refinement with OMC team pipeline. Triggers on "메모리 정리", "지식 정리",
+  "중복 제거", "refine", "메모리 최적화", "memory cleanup", "deduplicate",
+  "optimize memories", "consolidate" and similar. v3: Uses OMC analyst agent for
+  detection, executor for merge execution, verifier for confirmation. Reports
+  via messenger. Runs as nightly cron task automatically.
+---
+
+# Knowledge Refiner — Memory Optimization & Refinement Skill
+
+{{OCC_PREAMBLE}}
+
+## Role
+
+Analyze, optimize, and maintain the memory store health. Detect duplicates,
+merge similar memories, promote important ones, archive stale content, and
+apply importance decay. Produces a clear report of all changes made.
+
+## Workflow
+
+### Step 1 — Status Assessment
+
+```
+memory_stats → Get current memory store overview
+```
+
+Report: total count, category breakdown, average importance, recent activity.
+
+### Step 2 — Duplicate Detection
+
+```
+memory_similar(threshold: 0.5, limit: 10) → Find similar memory clusters
+```
+
+For each cluster found:
+- Show the memories and their similarity scores
+- Ask user: "These N memories overlap. Merge into the primary?"
+
+### Step 3 — Merge Execution (on approval)
+
+```
+memory_refine(id: primary_id, mode: "consolidate") → Get merge candidates
+memory_update(id: primary_id, mode: "append", content: merged_content)
+memory_link(source_id: primary_id, target_id: secondary_id, relation: "supersedes")
+memory_delete(id: secondary_id) → Remove merged duplicates
+```
+
+### Step 4 — Archive Preview
+
+```
+memory_archive(older_than: 30, dry_run: true) → Preview stale candidates
+```
+
+Show: list of candidates with age, importance, category.
+Ask user: "Archive these M stale memories?"
+
+### Step 5 — Archive Execution (on approval)
+
+```
+memory_archive(older_than: 30) → Execute archival
+```
+
+### Step 6 — Layer Upgrades
+
+```
+memory_refine(id: X, mode: "upgrade") → Promote eligible memories
+```
+
+Criteria:
+- episodic → working: access_count > 5 AND age > 7 days
+- working → longterm: importance >= 7 OR access_count > 10
+
+### Step 7 — Trigram Reindex
+
+```
+memory_reindex_trigrams → Rebuild similarity index after changes
+```
+
+### Step 8 — Final Report
+
+{{OCC_MEMORY_PERSIST}}
+
+{{OCC_MESSENGER_NOTIFY}}
+
+```markdown
+## Memory Refinement Report
+
+**Before**: X total memories
+**After**: Y total memories
+
+### Actions Taken
+- Merged: N clusters (M memories consolidated)
+- Archived: K memories (older than 30 days, importance < 7)
+- Upgraded: J memories (layer promotions)
+- Reindexed: trigram index rebuilt
+
+### Memory Health
+- Duplicate ratio: X% → Y%
+- Average importance: A → B
+- Layer distribution: episodic/working/longterm
+```
+
+## Safety Rules
+
+1. **Never auto-delete** — Always show candidates and get user approval
+2. **Preserve versions** — All mutations save previous version to memory_versions
+3. **Link before delete** — Create `supersedes` links before removing merged content
+4. **Dry run first** — Archive always previews before executing
+5. **Reindex after bulk changes** — Always rebuild trigram index after merges
+
+{{OCC_COMPLETION_STATUS}}

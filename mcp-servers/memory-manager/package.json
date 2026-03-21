@@ -1,0 +1,22 @@
+{
+  "name": "openclaw-cc-memory",
+  "version": "1.0.0",
+  "description": "Persistent memory manager MCP server for OpenClaw-CC",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "better-sqlite3": "^11.0.0",
+    "glob": "^11.0.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0"
+  }
+}

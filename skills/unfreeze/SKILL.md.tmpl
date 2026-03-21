@@ -1,0 +1,40 @@
+---
+name: unfreeze
+description: >
+  Remove edit scope restriction set by /freeze or /guard. Triggers on
+  "unfreeze", "편집 제한 해제", "잠금 해제", "remove freeze", "unlock edits".
+allowed-tools:
+  - Bash
+  - Read
+---
+
+# /unfreeze — Remove Edit Restrictions
+
+{{OCC_PREAMBLE}}
+
+Remove the freeze boundary set by `/freeze` or `/guard`. Edits will be unrestricted
+after this runs.
+
+## Action
+
+```bash
+STATE_DIR="${CLAUDE_PLUGIN_DATA:-${HOME}/.omc/state}"
+FREEZE_FILE="$STATE_DIR/freeze-dir.txt"
+
+if [ -f "$FREEZE_FILE" ]; then
+  PREV=$(cat "$FREEZE_FILE")
+  rm -f "$FREEZE_FILE"
+  echo "Freeze boundary removed. Previously restricted to: $PREV"
+else
+  echo "No freeze boundary was active."
+fi
+```
+
+Log:
+```
+memory_daily_log(type: "note", entry: "Freeze boundary removed")
+```
+
+Tell the user: "Edit restrictions removed. All files are now editable."
+
+{{OCC_COMPLETION_STATUS}}
