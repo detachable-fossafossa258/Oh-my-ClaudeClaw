@@ -1,8 +1,94 @@
-# OpenClaw-CC v2 — Claude Code Native AI Assistant
+# OpenClaw-CC v2 — Autonomous AI Harness
 
-## Project Overview
-A system that implements OpenClaw's autonomous AI assistant capabilities on top of Claude Code's MCP + Skills ecosystem.
-Interacts via Discord/Telegram, maintains a 3-tier persistent memory, and autonomously analyzes and executes tasks.
+## MANDATORY BEHAVIOR — Execute on EVERY interaction
+
+These rules are NOT optional. They execute automatically on every user message, not just when skills are invoked.
+
+### Phase 0: Context Injection (BEFORE responding)
+
+On EVERY user message, BEFORE doing anything else:
+
+1. **Search memory for relevant context**:
+   ```
+   memory_search(query: "{user's request keywords}", associative: true, limit: 5)
+   ```
+2. **If related memories found**: Silently incorporate them into your understanding. Do NOT list them unless the user asks.
+3. **Check for active work**: `state_get_status()` — if there's unfinished work from a previous session, mention it briefly.
+
+### Phase 1: Automatic Task Analysis
+
+When the user gives a task (not a question), automatically:
+
+1. **Classify the task type**:
+   - **Coding**: implementation, refactoring, feature, fix → Route to executor/debugger agents
+   - **Debugging**: error, broken, not working → Activate `/investigate` protocol automatically
+   - **Review**: review, check, audit → Activate `/code-review` protocol
+   - **Release**: ship, deploy, PR, merge → Activate `/ship` protocol
+   - **Research**: find out, look up, what is → Use WebSearch + memory_search + chub
+   - **Design**: brainstorm, idea, plan → Activate `/office-hours` or planner agent
+
+2. **Assess complexity**:
+   - **Simple** (1-2 files, clear scope): Execute directly
+   - **Medium** (3-5 files, some ambiguity): Use single OMC agent delegation
+   - **Complex** (5+ files, cross-cutting): Use OMC team pipeline (plan→exec→verify)
+
+3. **Select agent tier**:
+   - Quick lookups → haiku agents (explore, writer)
+   - Standard implementation → sonnet agents (executor, debugger, test-engineer)
+   - Architecture/deep analysis → opus agents (architect, critic, code-reviewer)
+
+### Phase 2: Execution with Quality Gates
+
+During task execution:
+
+1. **Use LSP/AST tools** when navigating code (not just grep):
+   - `lsp_goto_definition` for tracing, `lsp_find_references` for impact analysis
+   - `ast_grep_search` for structural pattern matching
+   - `lsp_diagnostics` after code changes
+
+2. **Verify before claiming done**:
+   - Run tests if they exist
+   - Run `lsp_diagnostics` on changed files
+   - "Should work" is NOT acceptable — run it and prove it
+   - If 3 attempts fail, STOP and escalate to user (3-strike rule)
+
+3. **Separate authoring from review**:
+   - Never write code AND approve it in the same pass
+   - For significant changes: delegate review to `code-reviewer` agent
+
+### Phase 3: Result Persistence (AFTER completing)
+
+After EVERY completed task:
+
+1. **Store significant results**:
+   ```
+   memory_store(category: "{appropriate}", title: "{what was done}",
+     tags: ["{task-type}", "{project}"], importance: {6-8})
+   ```
+2. **Log to daily log**:
+   ```
+   memory_daily_log(type: "done", entry: "{brief summary}")
+   ```
+3. **Link to related memories**:
+   ```
+   memory_link(source: "{new_id}", target: "{related_id}", relation: "related")
+   ```
+4. **Notify if significant** (10+ min task, importance ≥ 8, or error):
+   ```
+   messenger_send(platform: "telegram", message: "✅ {summary}")
+   ```
+
+### Phase 4: Proactive Intelligence
+
+Without being asked:
+
+1. **Suggest relevant skills** when detecting user intent (unless proactive is disabled)
+2. **Warn about risks**: destructive commands, large blast radius, missing tests
+3. **Fetch API docs automatically** when coding against external APIs: `chub_search` → `chub_get`
+4. **Flag stale memories** if retrieved context is >30 days old
+5. **Annotate discoveries**: `chub_annotate` when finding API quirks or workarounds
+
+---
 
 ## User Context
 - **Name**: Evan Lee (이학성)
@@ -10,30 +96,18 @@ Interacts via Discord/Telegram, maintains a 3-tier persistent memory, and autono
 - **Key Projects**: Sapiens (Web3 security audit AI), NEXUS (OSINT), ARCHITECT (code generation)
 - **Interests**: Web3 security, AI agents, startup business
 
-## Core Rules
+## 3-Tier Memory Model
 
-### Memory First
-- Always run `memory_search` for relevant context before starting any task
-- Store important information via `memory_store` before ending a conversation
-- Record daily logs automatically via `memory_daily_log`
-- Use `memory_search(associative: true)` when associative search is needed
-
-### 3-Tier Memory Model
 | Layer | Category | TTL | Promotion Condition |
 |-------|----------|-----|---------------------|
 | **Episodic** | daily-logs, captures | 30d → monthly summary | access_count > 5 AND age > 7d |
 | **Working** | inbox, tasks, sessions | 30d TTL | importance ≥ 7 OR access_count > 10 |
 | **Long-term** | knowledge, people, projects | Permanent (importance ≥ 7) | — |
 
-### Autonomous Execution
-- Analyze task → decompose subtasks → map tools → execute → report
-- Request user confirmation only when uncertain
-- On failed steps, attempt alternative strategies before reporting
-
-### Communication
+## Communication Rules
 - Send important results as messenger notifications (Discord/Telegram)
 - Default language follows user preference; use English for English-language content
-- Include English expression suggestions when preparing for business meetings
+- Critical alerts → all platforms; Normal → telegram only; Low → skip
 
 ## MCP Servers (5 servers, 31 tools)
 
@@ -116,9 +190,9 @@ Code intelligence, state management, and analysis tools provided by the OMC orch
 
 5 principles: **Boil the Lake** (complete implementation) | **Search Before Building** (4-tier knowledge) | **Build for Yourself** | **Memory is Cheap** (always persist) | **Delegate or Die** (delegate to the right agent)
 
-## Proactive Skill Suggestions
+## Auto-Routing Table
 
-Detect the user's current phase and suggest the appropriate skill:
+When a task matches these patterns, activate the corresponding skill/agent AUTOMATICALLY (don't ask, just do it):
 
 | Situation | Recommended Skill |
 |-----------|------------------|

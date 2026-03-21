@@ -19,6 +19,5 @@
     "mcp-server"
   ],
   "skills": "./skills/",
-  "agents": "./.claude/agents/",
   "mcpServers": "./.mcp.json"
 }
